@@ -8,8 +8,8 @@ define("OCUPACION", "¡Estudiante!");
 
 printf("Hola! mi nombre es %s y mi edad es %d <br>",$nombre_completo,$edad);
 echo "Actuamente me desempeño como ".OCUPACION. " puedes contactarme a traves de mi telefono $telefono o a mi correo $correo <br>";
-
-var_dump($nombre_completo,$edad,$correo,$telefono);
+print "Saludos! <br>";
+var_dump($nombre_completo,$edad,$correo,$telefono,OCUPACION);
 echo "<br>";
 
 
