@@ -36,4 +36,16 @@ imprimirCiudadesOrdenadas($ciudades);
 // Ejemplo de uso: contarCiudadesPorInicial($ciudades, 'S') debería retornar 1 (Singapur)
 // Tu código aquí
 
+function buscarCiudad($ciudades , $letra){
+    $total = 0;
+    for ($i = 0; $i < count($ciudades); $i++) {
+     if (substr($ciudades[$i], 0, 1) == $letra){
+        $total = $total + 1 ;     
+     }
+    }
+    return $total;
+}
+
+echo 'ciudades encontradas ' . buscarCiudad($ciudades , 'S');
+
 ?> 
