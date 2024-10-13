@@ -30,6 +30,11 @@ function validarComentarios($comentarios) {
     return strlen($comentarios) <= 500;
 }
 
+function validarFechaNacimiento($fechaNacimiento) {
+    $fecha = DateTime::createFromFormat('Y-m-d', $fechaNacimiento);
+    return $fecha && $fecha->format('Y-m-d') === $fechaNacimiento && $fecha < new DateTime();
+}
+
 function validarFotoPerfil($archivo) {
     $tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif'];
     $tamanoMaximo = 1 * 1024 * 1024; // 1MB

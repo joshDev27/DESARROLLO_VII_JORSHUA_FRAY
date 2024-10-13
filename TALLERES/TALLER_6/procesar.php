@@ -7,14 +7,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $datos = [];
 
     // Procesar y validar cada campo
-    $campos = ['nombre', 'email', 'edad', 'sitio_web', 'genero', 'intereses', 'comentarios'];
+    $campos = ['nombre', 'email', 'edad', 'fecha_nacimiento', 'sitio_web', 'genero', 'intereses', 'comentarios'];
     foreach ($campos as $campo) {
         if (isset($_POST[$campo])) {
             $valor = $_POST[$campo];
-            $valorSanitizado = call_user_func("sanitizar" . ucfirst($campo), $valor);
+            $valorSanitizado = call_user_func("sanitizar" . ucfirst(str_replace('_', '', $campo)), $valor);
             $datos[$campo] = $valorSanitizado;
 
-            if (!call_user_func("validar" . ucfirst($campo), $valorSanitizado)) {
+            if (!call_user_func("validar" . ucfirst(str_replace('_', '', $campo)), $valorSanitizado)) {
                 $errores[] = "El campo $campo no es válido.";
             }
         }
@@ -25,7 +25,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (!validarFotoPerfil($_FILES['foto_perfil'])) {
             $errores[] = "La foto de perfil no es válida.";
         } else {
-            $rutaDestino = 'uploads/' . basename($_FILES['foto_perfil']['name']);
+            $nombreArchivo = basename($_FILES['foto_perfil']['name']);
+            $rutaDestino = 'uploads/' . $nombreArchivo;
+            
+            // Asegurarse de que el nombre sea único
+            $contador = 1;
+            while (file_exists($rutaDestino)) {
+                $rutaDestino = 'uploads/' . pathinfo($nombreArchivo, PATHINFO_FILENAME) . "_$contador." . pathinfo($nombreArchivo, PATHINFO_EXTENSION);
+                $contador++;
+            }
+
             if (move_uploaded_file($_FILES['foto_perfil']['tmp_name'], $rutaDestino)) {
                 $datos['foto_perfil'] = $rutaDestino;
             } else {
