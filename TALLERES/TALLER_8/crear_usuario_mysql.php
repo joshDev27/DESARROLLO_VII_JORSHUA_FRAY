@@ -1,30 +1,80 @@
 <?php
-require_once "config_mysql.php";
+require_once "config_mysqli.php";
 
-if($_SERVER["REQUEST_METHOD"] == "POST"){
-    $nombre = mysqli_real_escape_string($conn, $_POST['nombre']);
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
-    
-    $sql = "INSERT INTO usuarios (nombre, email) VALUES (?, ?)";
-    
-    if($stmt = mysqli_prepare($conn, $sql)){
-        mysqli_stmt_bind_param($stmt, "ss", $nombre, $email);
-        
-        if(mysqli_stmt_execute($stmt)){
-            echo "Usuario creado con éxito.";
-        } else{
-            echo "ERROR: No se pudo ejecutar $sql. " . mysqli_error($conn);
-        }
+// 1. Mostrar las últimas 5 publicaciones con el nombre del autor y la fecha de publicación
+$sql = "SELECT p.titulo, u.nombre AS autor, p.fecha_publicacion 
+        FROM publicaciones p 
+        INNER JOIN usuarios u ON p.usuario_id = u.id 
+        ORDER BY p.fecha_publicacion DESC 
+        LIMIT 5";
+
+$result = mysqli_query($conn, $sql);
+
+if ($result) {
+    echo "<h3>Últimas 5 publicaciones:</h3>";
+    while ($row = mysqli_fetch_assoc($result)) {
+        echo "Título: " . $row['titulo'] . ", Autor: " . $row['autor'] . ", Fecha: " . $row['fecha_publicacion'] . "<br>";
     }
-    
-    mysqli_stmt_close($stmt);
+    mysqli_free_result($result);
+} else {
+    echo "Error: " . mysqli_error($conn);
+}
+
+// 2. Listar los usuarios que no han realizado ninguna publicación
+$sql = "SELECT u.id, u.nombre 
+        FROM usuarios u 
+        LEFT JOIN publicaciones p ON u.id = p.usuario_id 
+        WHERE p.id IS NULL";
+
+$result = mysqli_query($conn, $sql);
+
+if ($result) {
+    echo "<h3>Usuarios sin publicaciones:</h3>";
+    while ($row = mysqli_fetch_assoc($result)) {
+        echo "Usuario: " . $row['nombre'] . "<br>";
+    }
+    mysqli_free_result($result);
+} else {
+    echo "Error: " . mysqli_error($conn);
+}
+
+// 3. Calcular el promedio de publicaciones por usuario
+$sql = "SELECT AVG(num_publicaciones) AS promedio 
+        FROM (SELECT COUNT(p.id) AS num_publicaciones 
+              FROM usuarios u 
+              LEFT JOIN publicaciones p ON u.id = p.usuario_id 
+              GROUP BY u.id) AS subquery";
+
+$result = mysqli_query($conn, $sql);
+
+if ($result) {
+    $row = mysqli_fetch_assoc($result);
+    echo "<h3>Promedio de publicaciones por usuario:</h3>";
+    echo "Promedio: " . round($row['promedio'], 2);
+    mysqli_free_result($result);
+} else {
+    echo "Error: " . mysqli_error($conn);
+}
+
+// 4. Encontrar la publicación más reciente de cada usuario
+$sql = "SELECT u.nombre AS autor, p.titulo, p.fecha_publicacion 
+        FROM usuarios u 
+        INNER JOIN publicaciones p ON u.id = p.usuario_id 
+        WHERE p.fecha_publicacion = (SELECT MAX(fecha_publicacion) 
+                                      FROM publicaciones 
+                                      WHERE usuario_id = u.id)";
+
+$result = mysqli_query($conn, $sql);
+
+if ($result) {
+    echo "<h3>Publicación más reciente de cada usuario:</h3>";
+    while ($row = mysqli_fetch_assoc($result)) {
+        echo "Autor: " . $row['autor'] . ", Título: " . $row['titulo'] . ", Fecha: " . $row['fecha_publicacion'] . "<br>";
+    }
+    mysqli_free_result($result);
+} else {
+    echo "Error: " . mysqli_error($conn);
 }
 
 mysqli_close($conn);
 ?>
-
-<form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-    <div><label>Nombre</label><input type="text" name="nombre" required></div>
-    <div><label>Email</label><input type="email" name="email" required></div>
-    <input type="submit" value="Crear Usuario">
-</form>

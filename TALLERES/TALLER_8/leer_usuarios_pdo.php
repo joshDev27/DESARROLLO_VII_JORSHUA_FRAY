@@ -1,3 +1,4 @@
+<?php
 require_once "config_pdo.php";
 
 $sql = "SELECT id, nombre, email, fecha_registro FROM usuarios";
