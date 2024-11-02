@@ -1,5 +1,5 @@
 <?php
-require_once "config_mysqli.php";
+require_once "config_mysql.php";
 
 function mostrarResumenCategorias($conn) {
     $sql = "SELECT * FROM vista_resumen_categorias";

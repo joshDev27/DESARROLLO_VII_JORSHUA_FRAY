@@ -1,5 +1,5 @@
 <?php
-require_once "config_mysqli.php";
+require_once "config_mysql.php";
 
 // Función para registrar una venta
 function registrarVenta($conn, $cliente_id, $producto_id, $cantidad) {
